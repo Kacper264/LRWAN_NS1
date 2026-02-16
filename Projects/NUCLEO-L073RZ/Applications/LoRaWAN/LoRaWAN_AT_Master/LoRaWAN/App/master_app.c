@@ -140,10 +140,10 @@ static LoRaDriverParam_t LoRaDriverParam = {  SENSORS_MEASURE_CYCLE,  JOIN_MODE}
   */
 void MasterApp_Init(void)
 {
-
+  sSendDataBinary_t data;
   /* if using sequencer uncomment the task creation */
   /*UTIL_SEQ_RegTask((1 << CFG_SEQ_Task_Lora_fsm), UTIL_SEQ_RFU, Lora_fsm); */
-
+  SensorMeasureData(&data);
   Lora_Ctx_Init(&LoRaDriverCallbacks, &LoRaDriverParam);
 }
 

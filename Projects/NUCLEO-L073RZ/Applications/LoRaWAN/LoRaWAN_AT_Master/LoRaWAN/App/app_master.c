@@ -27,6 +27,7 @@
 #include "usart.h"
 #include "app_master.h"
 #include "sys_conf.h"
+#include "lrwan_ns1_printf.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */

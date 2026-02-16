@@ -25,7 +25,7 @@
 #include "sys_sensors.h"
 #include "rtc_if.h"
 #include "stdio.h"
-
+#include "lrwan_ns1_printf.h"
 
 #include ATCMD_MODEM        /* preprocessing definition in sys_conf.h*/
 
@@ -164,13 +164,13 @@ static void SensorMeasureData(sSendDataBinary_t *SendDataBinary)
   uint8_t LedState = 0;                /*just for padding*/
 #endif
   // 1. TODO LORA USE_LRWAN_NS1: uncomment those variables below vvv
-  /*
+/*
   uint16_t pressure = 0;
   int16_t temperature = 0;
   uint8_t humidity = 0;
-  uint32_t BatLevel = 0;               // end device connected to external power source
+  //uint32_t BatLevel = 0;               // end device connected to external power source
   ATEerror_t LoraCmdRetCode;
-  */
+*/
   uint8_t index = 0;
   /*read pressure, Humidity and Temperature in order to be send on LoRaWAN*/
   EnvSensors_Read(&Sensor);
@@ -183,7 +183,7 @@ static void SensorMeasureData(sSendDataBinary_t *SendDataBinary)
   // 1. TODO LORA USE_LRWAN_NS1: with two decimals precision 
   // 1. TODO LORA USE_LRWAN_NS1: #if defined()/#endif style 
   // 1. TODO LORA USE_LRWAN_NS1: hint: use dbg_printf_send() (where is it? how does it work?)
-
+  dbg_printf_send("Temperature: %.2f C | Humidity: %.2f %% | Pressure: %.2f hPa\r\n", Sensor.temperature, Sensor.humidity, Sensor.pressure);
 
   // 6. TODO LORA: convert temperature, pressure, humidity to data for SendDataBinary->Buffer
   // 6. TODO LORA: hint: decidegrees, decahPas, double humidity percents

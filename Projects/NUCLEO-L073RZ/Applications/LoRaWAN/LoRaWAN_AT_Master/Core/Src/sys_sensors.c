@@ -91,6 +91,7 @@ void EnvSensors_Read(sensor_t *sensor_data)
   // 5. TODO LORA USE_LRWAN_NS1: get values from humidity, temperature and pressure sensors
   // 5. TODO LORA USE_LRWAN_NS1: #if defined()/#elif style (next if becomes an elif)
   // 5. TODO LORA USE_LRWAN_NS1: otherwhise they are always using the same default values (which ones?)
+  BSP_TEMPERATURE_Get_Temp(TEMPERATURE_handle, &TEMPERATURE_Value);
 #if defined (SENSOR_ENABLED) && (SENSOR_ENABLED == 1)
 #if (USE_IKS01A2_ENV_SENSOR_HTS221_0 == 1)
   IKS01A2_ENV_SENSOR_GetValue(HTS221_0, ENV_HUMIDITY, &HUMIDITY_Value);

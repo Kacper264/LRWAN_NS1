@@ -164,13 +164,13 @@ static void SensorMeasureData(sSendDataBinary_t *SendDataBinary)
   uint8_t LedState = 0;                /*just for padding*/
 #endif
   // 1. TODO LORA USE_LRWAN_NS1: uncomment those variables below vvv
-/*
+
   uint16_t pressure = 0;
   int16_t temperature = 0;
   uint8_t humidity = 0;
   //uint32_t BatLevel = 0;               // end device connected to external power source
-  ATEerror_t LoraCmdRetCode;
-*/
+  //ATEerror_t LoraCmdRetCode;
+
   uint8_t index = 0;
   /*read pressure, Humidity and Temperature in order to be send on LoRaWAN*/
   EnvSensors_Read(&Sensor);
@@ -187,8 +187,11 @@ static void SensorMeasureData(sSendDataBinary_t *SendDataBinary)
 
   // 6. TODO LORA: convert temperature, pressure, humidity to data for SendDataBinary->Buffer
   // 6. TODO LORA: hint: decidegrees, decahPas, double humidity percents
-  // 6. TODO LORA: do the proper final type casts for each of those values!
- 
+  // 6. TODO LORA: do the proper final type casts for each of those values
+  temperature = Sensor.temperature*10;
+  humidity = Sensor.humidity*2;
+  pressure = Sensor.pressure*10;
+  dbg_printf_send("Temperature2: %d decC | Humidity2: %d %% | Pressure2: %d dahPa\r\n", temperature, humidity, pressure);
   // 7. TODO LORA: create your data payload as per defined in the practical work
   // 7. TODO LORA: you will write into the SendDataBinary->Buffer
  

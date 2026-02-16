@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "sys_sensors.h"
+#include "lrwan_ns1_temperature.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -123,7 +124,8 @@ void  EnvSensors_Init(void)
   // 4. TODO LORA USE_LRWAN_NS1: initialize sensors
   // 4. TODO LORA USE_LRWAN_NS1: #if defined()/#elif style (next if becomes an elif)
   // 4. TODO LORA USE_LRWAN_NS1: and maybe also do something else (are they activated?)
-
+	BSP_TEMPERATURE_Init(HTS221_T_0, &TEMPERATURE_handle);
+	BSP_TEMPERATURE_Sensor_Enable(TEMPERATURE_handle);
 #if defined (SENSOR_ENABLED) && (SENSOR_ENABLED == 1)
   /* Init */
 #if (USE_IKS01A2_ENV_SENSOR_HTS221_0 == 1)

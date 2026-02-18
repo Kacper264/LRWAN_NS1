@@ -140,9 +140,14 @@ static LoRaDriverParam_t LoRaDriverParam = {  SENSORS_MEASURE_CYCLE,  JOIN_MODE}
   */
 void MasterApp_Init(void)
 {
-  sSendDataBinary_t data;
+
   /* if using sequencer uncomment the task creation */
   /*UTIL_SEQ_RegTask((1 << CFG_SEQ_Task_Lora_fsm), UTIL_SEQ_RFU, Lora_fsm); */
+  sSendDataBinary_t data;
+  char buf[32];
+
+  data.Buffer = buf;
+  data.DataSize = 0;
   SensorMeasureData(&data);
   Lora_Ctx_Init(&LoRaDriverCallbacks, &LoRaDriverParam);
 }
@@ -168,7 +173,7 @@ static void SensorMeasureData(sSendDataBinary_t *SendDataBinary)
   uint16_t pressure = 0;
   int16_t temperature = 0;
   uint8_t humidity = 0;
-  //uint32_t BatLevel = 0;               // end device connected to external power source
+  uint32_t BatLevel = 0;               // end device connected to external power source
   //ATEerror_t LoraCmdRetCode;
 
   uint8_t index = 0;
@@ -194,7 +199,30 @@ static void SensorMeasureData(sSendDataBinary_t *SendDataBinary)
   dbg_printf_send("Temperature2: %d decC | Humidity2: %d %% | Pressure2: %d dahPa\r\n", temperature, humidity, pressure);
   // 7. TODO LORA: create your data payload as per defined in the practical work
   // 7. TODO LORA: you will write into the SendDataBinary->Buffer
- 
+
+  Lora_GetBatLevel(&BatLevel);
+
+  uint8_t battery_percent = (uint8_t)((BatLevel * 100U) / 254U);
+
+  const char group_id[] = "KW_HB_AG";
+  uint8_t gid_len = sizeof(group_id) - 1;
+
+  SendDataBinary->Buffer[index++] = 1;
+  SendDataBinary->Buffer[index++] = LPP_DATATYPE_FRAME_IDENTIFIER;
+  SendDataBinary->Buffer[index++] = gid_len;
+  memcpy(&SendDataBinary->Buffer[index], group_id, gid_len);
+  index += gid_len;
+
+  SendDataBinary->Buffer[index++] = 2;
+  SendDataBinary->Buffer[index++] = LPP_DATATYPE_TEMPERATURE;
+  SendDataBinary->Buffer[index++] = 2;
+  SendDataBinary->Buffer[index++] = (temperature >> 8) & 0xFF;  // MSB
+  SendDataBinary->Buffer[index++] =  temperature       & 0xFF;  // LSB
+
+  SendDataBinary->Buffer[index++] = 3;
+  SendDataBinary->Buffer[index++] = LPP_DATATYPE_DIGITAL_INPUT;
+  SendDataBinary->Buffer[index++] = 1;
+  SendDataBinary->Buffer[index++] = battery_percent;
 
 #else
 

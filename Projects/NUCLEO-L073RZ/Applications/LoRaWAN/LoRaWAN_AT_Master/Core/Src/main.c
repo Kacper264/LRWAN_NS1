@@ -31,6 +31,8 @@
 #include <stdarg.h>
 #include "rtc_if.h"
 #include "lrwan_ns1_printf.h"
+#include "sys_sensors.h"
+#include "master_app.h"
 #include ATCMD_MODEM        /* preprocessing definition in sys_conf.h*/
 
 

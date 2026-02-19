@@ -144,7 +144,7 @@ void MasterApp_Init(void)
   /* if using sequencer uncomment the task creation */
   /*UTIL_SEQ_RegTask((1 << CFG_SEQ_Task_Lora_fsm), UTIL_SEQ_RFU, Lora_fsm); */
   sSendDataBinary_t data;
-  char buf[32];
+  char buf[96];
 
   data.Buffer = buf;
   data.DataSize = 0;
@@ -213,11 +213,20 @@ static void SensorMeasureData(sSendDataBinary_t *SendDataBinary)
   memcpy(&SendDataBinary->Buffer[index], group_id, gid_len);
   index += gid_len;
 
+  SendDataBinary->Buffer[index++] = LPP_DATATYPE_BAROMETER;
   SendDataBinary->Buffer[index++] = 2;
+  SendDataBinary->Buffer[index++] = (pressure >> 8) & 0xFF;
+  SendDataBinary->Buffer[index++] =  pressure & 0xFF;
+
   SendDataBinary->Buffer[index++] = LPP_DATATYPE_TEMPERATURE;
   SendDataBinary->Buffer[index++] = 2;
   SendDataBinary->Buffer[index++] = (temperature >> 8) & 0xFF;  // MSB
   SendDataBinary->Buffer[index++] =  temperature       & 0xFF;  // LSB
+
+  SendDataBinary->Buffer[index++] = LPP_DATATYPE_HUMIDITY;
+  SendDataBinary->Buffer[index++] = 2;
+  SendDataBinary->Buffer[index++] = (humidity >> 8) & 0xFF;
+  SendDataBinary->Buffer[index++] =  humidity & 0xFF;
 
   SendDataBinary->Buffer[index++] = 3;
   SendDataBinary->Buffer[index++] = LPP_DATATYPE_DIGITAL_INPUT;

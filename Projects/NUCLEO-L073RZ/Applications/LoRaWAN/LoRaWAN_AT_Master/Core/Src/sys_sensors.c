@@ -19,6 +19,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "sys_sensors.h"
+#include "lrwan_ns1_temperature.h"
+#include "lrwan_ns1_pressure.h"
+#include "lrwan_ns1_humidity.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -64,6 +67,11 @@ IKS01A2_ENV_SENSOR_Capabilities_t EnvCapabilities;
 
 // 3. TODO LORA USE_LRWAN_NS1: instanciate handle variables for humidity, temperature and pressure
 // 3. TODO LORA USE_LRWAN_NS1: #if defined()/#endif style
+#if defined(USE_LRWAN_NS1)
+	void *HUMIDITY_handle = NULL;
+	void *TEMPERATURE_handle = NULL;
+	void *PRESSURE_handle = NULL;
+#endif
 
 /* USER CODE END PV */
 
@@ -85,6 +93,10 @@ void EnvSensors_Read(sensor_t *sensor_data)
   // 5. TODO LORA USE_LRWAN_NS1: get values from humidity, temperature and pressure sensors
   // 5. TODO LORA USE_LRWAN_NS1: #if defined()/#elif style (next if becomes an elif)
   // 5. TODO LORA USE_LRWAN_NS1: otherwhise they are always using the same default values (which ones?)
+  BSP_TEMPERATURE_Get_Temp(TEMPERATURE_handle, &TEMPERATURE_Value);
+  BSP_HUMIDITY_Get_Hum(HUMIDITY_handle, &HUMIDITY_Value);
+  BSP_PRESSURE_Get_Press(PRESSURE_handle, &PRESSURE_Value);
+
 #if defined (SENSOR_ENABLED) && (SENSOR_ENABLED == 1)
 #if (USE_IKS01A2_ENV_SENSOR_HTS221_0 == 1)
   IKS01A2_ENV_SENSOR_GetValue(HTS221_0, ENV_HUMIDITY, &HUMIDITY_Value);
@@ -118,6 +130,14 @@ void  EnvSensors_Init(void)
   // 4. TODO LORA USE_LRWAN_NS1: initialize sensors
   // 4. TODO LORA USE_LRWAN_NS1: #if defined()/#elif style (next if becomes an elif)
   // 4. TODO LORA USE_LRWAN_NS1: and maybe also do something else (are they activated?)
+	BSP_TEMPERATURE_Init(HTS221_T_0, &TEMPERATURE_handle);
+	BSP_TEMPERATURE_Sensor_Enable(TEMPERATURE_handle);
+
+	BSP_PRESSURE_Init(PRESSURE_SENSORS_AUTO, &PRESSURE_handle);
+	BSP_PRESSURE_Sensor_Enable(PRESSURE_handle);
+
+	BSP_HUMIDITY_Init(HTS221_H_0, &HUMIDITY_handle);
+	BSP_HUMIDITY_Sensor_Enable(HUMIDITY_handle);
 
 #if defined (SENSOR_ENABLED) && (SENSOR_ENABLED == 1)
   /* Init */

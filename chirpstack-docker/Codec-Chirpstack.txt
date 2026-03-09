@@ -1,0 +1,97 @@
+function i16be(bytes) {
+  let v = (bytes[0] << 8) | bytes[1];
+  if (v & 0x8000) v = v - 0x10000;
+  return v;
+}
+
+function u16be(bytes) {
+  return (bytes[0] << 8) | bytes[1];
+}
+
+function u8(bytes) {
+  return bytes[0];
+}
+
+const TYPE_DECODERS = {
+  0x73: { key: "pressure_hpa",    decode: (raw) => u16be(raw) / 10.0 },
+  0x67: { key: "temperature_c",   decode: (raw) => i16be(raw) / 10.0 },
+  0x68: { key: "humidity_pct",    decode: (raw) => u16be(raw) / 2.0 },
+  0x00: { key: "digital_input",   decode: (raw) => u8(raw) },
+  0x01: { key: "digital_output",  decode: (raw) => u8(raw) },
+  0x02: { key: "analog_input",    decode: (raw) => i16be(raw) / 100.0 },
+  0x03: { key: "analog_output",   decode: (raw) => i16be(raw) / 100.0 },
+};
+
+function tryParseCustomHeader(buf) {
+  if (buf.length < 3) return { header: null, offset: 0 };
+
+  const version = buf[0];
+  const msgType = buf[1];
+  const nameLen = buf[2];
+
+  if (3 + nameLen <= buf.length) {
+    const nameBytes = buf.slice(3, 3 + nameLen);
+    // check printable ASCII
+    let printable = true;
+    for (let i = 0; i < nameBytes.length; i++) {
+      if (nameBytes[i] < 32 || nameBytes[i] > 126) { printable = false; break; }
+    }
+    if (printable) {
+      const deviceName = String.fromCharCode.apply(null, nameBytes);
+      return {
+        header: { version, msgType, device: deviceName },
+        offset: 3 + nameLen,
+      };
+    }
+  }
+  return { header: null, offset: 0 };
+}
+
+function decodeTLV(buf, startOffset) {
+  const out = {};
+  let i = startOffset;
+
+  while (i + 3 <= buf.length) {
+    const ch = buf[i];
+    const t  = buf[i + 1];
+    const ln = buf[i + 2];
+    i += 3;
+
+    if (i + ln > buf.length) break;
+
+    const raw = buf.slice(i, i + ln);
+    i += ln;
+
+    const def = TYPE_DECODERS[t];
+    if (def) {
+      // si tu veux distinguer les canaux, tu peux suffixer avec _chX
+      // ex: out[`${def.key}_ch${ch}`] = def.decode(raw);
+      out[def.key] = def.decode(raw);
+    } else {
+      // optionnel: garder les types inconnus
+      // out[`unknown_0x${t.toString(16)}_ch${ch}`] = Array.from(raw);
+    }
+  }
+
+  return out;
+}
+
+// ChirpStack v4
+function decodeUplink(input) {
+  const bytes = input.bytes;
+
+  const { header, offset } = tryParseCustomHeader(bytes);
+  const measures = decodeTLV(bytes, offset);
+
+  // on fusionne header + mesures dans l'object
+  const obj = Object.assign({}, measures);
+  if (header) {
+    obj.header_version = header.version;
+    obj.header_msg_type = header.msgType;
+    obj.header_device = header.device;
+  }
+
+  return {
+    data: obj,
+  };
+}
